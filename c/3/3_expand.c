@@ -12,19 +12,15 @@ cases like a-b-c and a-z0-9 and -a-z. Arrange that a leading or trailing
 void expand(char[], char[]);
 
 int main() {
-  expand("a-z", "                          ");
-  putchar('\n');
-  expand("0-8", "         ");
-  putchar('\n');
-  expand("a-f-k", "           ");
-  putchar('\n');
-  expand("D-K", "        ");
-  putchar('\n');
-  expand("1-4-7", "       ");
-  putchar('\n');
-  expand("-a-z-", "                            ");
-  putchar('\n');
-  expand("a-z0-9", "                                    ");
+  // char input[] = "a-z";
+  // char input[] = "0-8";
+  // char input[] = "a-f-k";
+  // char input[] = "D-K";
+  // char input[] = "1-4-7";
+  // char input[] = "-a-z-";
+  char input[] = "a-z0-9";
+  char output[100];
+  expand(input, output);
   return 0;
 }
 
@@ -43,7 +39,7 @@ void expand(char input[], char output[]) {
       if (start) {
         for (j = start; j <= c; j++) {
           if (j != last) {
-            output[pos] = c;
+            output[pos] = j;
             pos++;
             last = j;
           }
@@ -57,7 +53,7 @@ void expand(char input[], char output[]) {
       if (start) {
         for (j = start; j <= c; j++) {
           if (j != last) {
-            output[pos] = c;
+            output[pos] = j;
             pos++;
             last = j;
           }
@@ -71,7 +67,7 @@ void expand(char input[], char output[]) {
       if (start) {
         for (j = start; j <= c; j++) {
           if (j != last) {
-            output[pos] = c;
+            output[pos] = j;
             pos++;
             last = j;
           }
@@ -93,5 +89,6 @@ void expand(char input[], char output[]) {
       }
     }
   }
-  // printf("%s", output);
+  output[pos] = '\0';
+  printf("%s", output);
 }
