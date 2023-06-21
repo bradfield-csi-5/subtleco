@@ -18,7 +18,7 @@ double atof(char s[]) {
     val = 10.0 * val + (s[i] - '0');
     power *= 10.0;
   }
-  if (s[i] == 'e') {
+  if (s[i] == 'e' || s[i] == 'E') {
     i++;
     op = (s[i] == '-') ? 0 : 1; // if the e statement includes '-', we multiply
                                 // power. Else divide power.
