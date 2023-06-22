@@ -84,13 +84,17 @@ void ungetch(int);
 
 // getop: get next operator or numeric operand
 int getop(char s[]) {
-  int i, c;
+  int i, c, neg = 0;
 
   while ((s[0] = c = getch()) == ' ' || c == '\t')
     ;
 
   s[1] = '\0';
-  if (!isdigit(c) && c != '.') {
+  if (c == '-' && (isdigit(c = getch()))) { // check for a negative number
+    ungetch(c);
+    neg = 1;
+  }
+  if (!isdigit(c) && c != '.' && !neg) {
     return c; /* not a number */
   }
   i = 0;
@@ -103,8 +107,11 @@ int getop(char s[]) {
       ;
   }
   s[i] = '\0';
-  if (c != EOF)
+  if (c != EOF) {
+    printf("END OF OP UNGETCH -- ");
     ungetch(c);
+  }
+  printf("TYPE is NUMBER\n");
   return NUMBER;
 }
 
@@ -113,11 +120,18 @@ int getop(char s[]) {
 char buf[BUFSIZE];
 int bufp = 0;
 
-int getch(void) { return (bufp > 0) ? buf[--bufp] : getchar(); }
+int getch(void) { 
+  char c;
+  c = (bufp > 0) ? buf[--bufp] : getchar();
+  printf("GETCH %c\n", c);
+  return c;
+}
 
 void ungetch(int c) {
   if (bufp >= BUFSIZE)
     printf("ungetch: too many chars\n");
-  else
+  else {
+    printf("UNGETCH %c\n", c);
     buf[bufp++] = c;
+  }
 }
