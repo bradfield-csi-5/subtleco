@@ -51,7 +51,7 @@ char *alloc(int n)               // return pointer to n characters
 }
 
 /* numcmp: compare s1 and s2 numerically */
-int numcmp(char *s1, char *s2)
+int numcmp(const char *s1, const char *s2)
 {
   double v1, v2;
 

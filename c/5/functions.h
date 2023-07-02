@@ -12,7 +12,7 @@ int readlines(char *lineptr[], int nlines);
 void writelines(char *lineptr[], int nlines);
 void my_qsort(void *lineptr[], int, int, int (*comp)(void *, void *));
 char *alloc(int);
-int numcmp(char *, char *);
+int numcmp(const char *, const char *);
 void swap(void *[], int, int);
 
 #endif // FUNCTIONS_H
