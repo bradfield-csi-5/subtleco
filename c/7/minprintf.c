@@ -38,7 +38,8 @@ void minprintf(char *fmt, ...) {
 int main() {
   int num = 23;
   char *string = "Hello, world!";
-  double d = 3.141592653589793238462643383279502884197169399375105820974944592307816406286;
+  double d =
+      3.141592653589793238462643383279502884197169399375105820974944592307816406286;
   minprintf("%d\n", num);
   minprintf("%s\n", string);
   minprintf("%f\n", d);
