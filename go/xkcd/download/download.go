@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 )
 
 const (
@@ -13,11 +14,18 @@ const (
 	Postfix   = "/info.0.json"
 )
 
-type ComicInfo struct {
-	Title string `json:"safe_title"`
+type ComicJsonInfo struct {
+	Title      string `json:"safe_title"`
+	Transcript string
 }
 
-func Download(comic int) (*ComicInfo, error) {
+type ComicInfo struct {
+	URL  string
+	JSON ComicJsonInfo
+	Err  error
+}
+
+func Download(comic int) (*ComicJsonInfo, error) {
 	resp, err := http.Get(URL + fmt.Sprint(comic) + Postfix)
 	if err != nil {
 		return nil, err
@@ -33,7 +41,7 @@ func Download(comic int) (*ComicInfo, error) {
 		return nil, err
 	}
 
-	var comicInfo ComicInfo
+	var comicInfo ComicJsonInfo
 	err = json.Unmarshal(body, &comicInfo)
 	if err != nil {
 		return nil, err
@@ -41,21 +49,50 @@ func Download(comic int) (*ComicInfo, error) {
 	return &comicInfo, nil
 }
 
-func GetTitle(comic int, ch chan<- string) {
-	comicInfo, err := Download(comic)
+func GetComic(comic int, ch chan<- ComicInfo) {
+	comicRes, err := Download(comic)
+	url := "thing"
 	if err != nil {
-		ch <- fmt.Sprint(err)
+		ch <- ComicInfo{URL: url, Err: err}
+		return
 	}
-	ch <- comicInfo.Title
+	comicInfo := ComicInfo{URL: url, JSON: *comicRes}
+
+	ch <- comicInfo
 }
 
 func main() {
 	testComics := [3]int{571, 572, 573}
-	ch := make(chan string)
+	ch := make(chan ComicInfo)
 	for _, comic := range testComics {
-		go GetTitle(comic, ch)
+		go GetComic(comic, ch)
 	}
+
+	// ensure the dir "lib" exists
+	if _, err := os.Stat("lib"); os.IsNotExist(err) {
+		os.Mkdir("lib", 0755)
+	}
+
+	// Open a new file in append mode
+	file, err := os.OpenFile("lib/comics.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Failed to open file: ", err)
+		return
+	}
+
+	defer file.Close()
+
+	// Write the titles to the file
 	for range testComics {
-		fmt.Println(<-ch)
+		comic := <-ch
+		if comic.Err != nil {
+			fmt.Println("error fetchinc comic: ", err)
+		}
+		jsonData, err := json.Marshal(comic)
+
+		_, err = file.Write(jsonData)
+		if err != nil {
+			fmt.Println("Failed to write to file:", err)
+		}
 	}
 }
