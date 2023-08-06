@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	NumComics = 2811
+	// NumComics = 2811
+	NumComics = 3
 	URL       = "https://xkcd.com/"
 	Postfix   = "/info.0.json"
 )
@@ -61,11 +62,36 @@ func GetComic(comic int, ch chan<- ComicInfo) {
 	ch <- comicInfo
 }
 
+func collectComics(ch chan ComicInfo) ([]ComicInfo, error) {
+	var comics []ComicInfo
+	for i := 0; i < NumComics; i++ {
+		comic := <-ch
+
+		if comic.Err != nil {
+			fmt.Println("error fetchinc comic: ", comic.Err)
+			continue
+		}
+		comics = append(comics, comic)
+	}
+	return comics, nil
+}
+
+func jsonifyComics(allComics []ComicInfo) ([]byte, error) {
+	jsonData, jsonErr := json.MarshalIndent(allComics, "", "    ")
+	if jsonErr != nil {
+		fmt.Println("error writing info: ", jsonErr)
+		return make([]byte, 0), nil
+	}
+	return jsonData, nil
+}
+
 func main() {
-	testComics := [3]int{571, 572, 573}
+	// Stand up a channel for goroutine
 	ch := make(chan ComicInfo)
-	for _, comic := range testComics {
-		go GetComic(comic, ch)
+
+	// Get the comics
+	for i := 0; i < NumComics; i++ {
+		go GetComic(i+1, ch)
 	}
 
 	// ensure the dir "lib" exists
@@ -79,25 +105,13 @@ func main() {
 		fmt.Println("Failed to open file: ", err)
 		return
 	}
-
 	defer file.Close()
 
-	// Write the titles to the file
-	var allComics []ComicInfo
-	for range testComics {
-		comic := <-ch
+	// Get the Comics into a writeable JSON state
+	allComics, err := collectComics(ch)
+	jsonData, err := jsonifyComics(allComics)
 
-		if comic.Err != nil {
-			fmt.Println("error fetchinc comic: ", err)
-			continue
-		}
-		allComics = append(allComics, comic)
-
-	}
-	jsonData, jsonErr := json.MarshalIndent(allComics, "", "    ")
-	if jsonErr != nil {
-		fmt.Println("error writing info: ", jsonErr)
-	}
+	// Write to the file in bulk
 	_, err = file.Write(jsonData)
 	if err != nil {
 		fmt.Println("Failed to write to file: ", err)
