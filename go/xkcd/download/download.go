@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	// NumComics = 2811
-	NumComics = 3
+	NumComics = 100
 	URL       = "https://xkcd.com/"
 	Postfix   = "/info.0.json"
+	BUF_SIZE  = 20
 )
 
 type ComicJsonInfo struct {
@@ -85,13 +85,14 @@ func jsonifyComics(allComics []ComicInfo) ([]byte, error) {
 	return jsonData, nil
 }
 
-func main() {
+func bufferedMain(NumberOfComics int, start int) {
 	// Stand up a channel for goroutine
 	ch := make(chan ComicInfo)
 
 	// Get the comics
-	for i := 0; i < NumComics; i++ {
-		go GetComic(i+1, ch)
+	// Consider limiting the number of simultaneous goroutines here.
+	for i := 0; i < NumberOfComics; i++ {
+		go GetComic(i+start+1, ch)
 	}
 
 	// ensure the dir "lib" exists
@@ -99,21 +100,40 @@ func main() {
 		os.Mkdir("lib", 0755)
 	}
 
-	// Open a new file in append mode
-	file, err := os.OpenFile("lib/comics.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// Open a new file, overwrite if exists
+	file, err := os.OpenFile("lib/comics.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Println("Failed to open file: ", err)
 		return
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			fmt.Println("Failed to close file:", cerr)
+		}
+	}()
 
 	// Get the Comics into a writeable JSON state
 	allComics, err := collectComics(ch)
+	if err != nil {
+		fmt.Println("Failed to collect comics:", err)
+		return
+	}
+
 	jsonData, err := jsonifyComics(allComics)
+	if err != nil {
+		fmt.Println("Failed to convert comics to JSON:", err)
+		return
+	}
 
 	// Write to the file in bulk
 	_, err = file.Write(jsonData)
 	if err != nil {
 		fmt.Println("Failed to write to file: ", err)
+	}
+}
+
+func main() {
+	comicsLeft := NumComics
+	for i := 0; comicsLeft > 0; i += BUF_SIZE {
 	}
 }
