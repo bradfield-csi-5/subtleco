@@ -51,7 +51,7 @@ func Download(comic int) (*ComicJsonInfo, error) {
 
 func GetComic(comic int, ch chan<- ComicInfo) {
 	comicRes, err := Download(comic)
-	url := "thing"
+	url := URL + fmt.Sprint(comic)
 	if err != nil {
 		ch <- ComicInfo{URL: url, Err: err}
 		return
@@ -83,16 +83,23 @@ func main() {
 	defer file.Close()
 
 	// Write the titles to the file
+	var allComics []ComicInfo
 	for range testComics {
 		comic := <-ch
+
 		if comic.Err != nil {
 			fmt.Println("error fetchinc comic: ", err)
+			continue
 		}
-		jsonData, err := json.Marshal(comic)
+		allComics = append(allComics, comic)
 
-		_, err = file.Write(jsonData)
-		if err != nil {
-			fmt.Println("Failed to write to file:", err)
-		}
+	}
+	jsonData, jsonErr := json.MarshalIndent(allComics, "", "    ")
+	if jsonErr != nil {
+		fmt.Println("error writing info: ", jsonErr)
+	}
+	_, err = file.Write(jsonData)
+	if err != nil {
+		fmt.Println("Failed to write to file: ", err)
 	}
 }
