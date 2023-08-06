@@ -1,4 +1,4 @@
-package main
+package download
 
 import (
 	"encoding/json"
@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	NumComics = 100
-	URL       = "https://xkcd.com/"
-	Postfix   = "/info.0.json"
-	BUF_SIZE  = 20
+	NumComics = 2811
+	// NumComics = 200
+	URL     = "https://xkcd.com/"
+	Postfix = "/info.0.json"
 )
 
 type ComicJsonInfo struct {
@@ -38,6 +38,7 @@ func Download(comic int) (*ComicJsonInfo, error) {
 	}
 
 	body, err := io.ReadAll(resp.Body)
+	fmt.Println("Got comic no. ", comic)
 	if err != nil {
 		return nil, err
 	}
@@ -50,30 +51,15 @@ func Download(comic int) (*ComicJsonInfo, error) {
 	return &comicInfo, nil
 }
 
-func GetComic(comic int, ch chan<- ComicInfo) {
+func GetComic(comic int) (ComicInfo, error) {
 	comicRes, err := Download(comic)
 	url := URL + fmt.Sprint(comic)
 	if err != nil {
-		ch <- ComicInfo{URL: url, Err: err}
-		return
+		return ComicInfo{URL: url, Err: err}, err
 	}
 	comicInfo := ComicInfo{URL: url, JSON: *comicRes}
 
-	ch <- comicInfo
-}
-
-func collectComics(ch chan ComicInfo) ([]ComicInfo, error) {
-	var comics []ComicInfo
-	for i := 0; i < NumComics; i++ {
-		comic := <-ch
-
-		if comic.Err != nil {
-			fmt.Println("error fetchinc comic: ", comic.Err)
-			continue
-		}
-		comics = append(comics, comic)
-	}
-	return comics, nil
+	return comicInfo, nil
 }
 
 func jsonifyComics(allComics []ComicInfo) ([]byte, error) {
@@ -85,14 +71,16 @@ func jsonifyComics(allComics []ComicInfo) ([]byte, error) {
 	return jsonData, nil
 }
 
-func bufferedMain(NumberOfComics int, start int) {
-	// Stand up a channel for goroutine
-	ch := make(chan ComicInfo)
-
+func main() {
 	// Get the comics
 	// Consider limiting the number of simultaneous goroutines here.
-	for i := 0; i < NumberOfComics; i++ {
-		go GetComic(i+start+1, ch)
+	var allComics []ComicInfo
+	for i := 0; i < NumComics; i++ {
+		comic, comicErr := GetComic(i + 1)
+		if comicErr != nil {
+			fmt.Println("Had trouble getting a comic: ", comicErr)
+		}
+		allComics = append(allComics, comic)
 	}
 
 	// ensure the dir "lib" exists
@@ -113,12 +101,6 @@ func bufferedMain(NumberOfComics int, start int) {
 	}()
 
 	// Get the Comics into a writeable JSON state
-	allComics, err := collectComics(ch)
-	if err != nil {
-		fmt.Println("Failed to collect comics:", err)
-		return
-	}
-
 	jsonData, err := jsonifyComics(allComics)
 	if err != nil {
 		fmt.Println("Failed to convert comics to JSON:", err)
@@ -129,11 +111,5 @@ func bufferedMain(NumberOfComics int, start int) {
 	_, err = file.Write(jsonData)
 	if err != nil {
 		fmt.Println("Failed to write to file: ", err)
-	}
-}
-
-func main() {
-	comicsLeft := NumComics
-	for i := 0; comicsLeft > 0; i += BUF_SIZE {
 	}
 }
