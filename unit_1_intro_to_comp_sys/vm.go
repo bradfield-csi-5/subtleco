@@ -1,5 +1,7 @@
 package vm
 
+import "fmt"
+
 const (
 	NOOP  = 0x00
 	LOAD  = 0x01
@@ -17,7 +19,7 @@ func compute(memory []byte) {
 	var registry [3]byte
 	var currentInstruction, decodedInstruction [3]byte
 	registry[0] = 8
-
+	fmt.Printf("STUFF")
 	for {
 		fetch(registry[:], memory, &currentInstruction)
 		if currentInstruction[0] == HALT {

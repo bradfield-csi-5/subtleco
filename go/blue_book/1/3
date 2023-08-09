@@ -1,0 +1,28 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"strings"
+	"time"
+)
+
+// func main() {
+// 	start := time.Now().UnixMicro()
+// 	var s, sep string
+//
+// 	for _, arg := range os.Args {
+// 		s += sep + arg
+// 		sep = " "
+// 	}
+// 	fmt.Println(s)
+// 	fin := time.Now().UnixMicro()
+// 	fmt.Println(fin - start)
+// }
+
+func main() {
+	start := time.Now().UnixNano()
+	fmt.Println(strings.Join(os.Args, " "))
+	fin := time.Now().UnixNano()
+	fmt.Println(fin - start)
+}
