@@ -16,6 +16,8 @@ void test_fib_0(void) { TEST_ASSERT_EQUAL(0, fib(0)); }
 void test_fib_1(void) { TEST_ASSERT_EQUAL(1, fib(1)); }
 void test_fib_2(void) { TEST_ASSERT_EQUAL(1, fib(2)); }
 void test_fib_3(void) { TEST_ASSERT_EQUAL(2, fib(3)); }
+void test_fib_4(void) { TEST_ASSERT_EQUAL(3, fib(4)); }
+void test_fib_5(void) { TEST_ASSERT_EQUAL(5, fib(5)); }
 void test_fib_10(void) { TEST_ASSERT_EQUAL(55, fib(10)); }
 void test_fib_12(void) { TEST_ASSERT_EQUAL(144, fib(12)); }
 
@@ -54,6 +56,8 @@ int main(void) {
     RUN_TEST(test_fib_1);
     RUN_TEST(test_fib_2);
     RUN_TEST(test_fib_3);
+    RUN_TEST(test_fib_4);
+    RUN_TEST(test_fib_5);
     RUN_TEST(test_fib_10);
     RUN_TEST(test_fib_12);
 

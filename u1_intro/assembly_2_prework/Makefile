@@ -1,7 +1,7 @@
 AS = nasm
 
-CFLAGS = -g -Wall -Wextra -pedantic -Werror
-LDFLAGS =
+CFLAGS = -g -Wall -Wextra -pedantic -Werror -arch x86_64
+LDFLAGS = -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ASFLAGS = -g -F dwarf -Werror
 
 ifeq ($(shell uname -s),Darwin)
