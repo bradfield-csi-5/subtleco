@@ -1,0 +1,7 @@
+raw = 4.61 
+vec_len out of loop = 4.03
+double loop unroll = 3.99
+four loop unroll = 3.70
+four loop unroll + multi acc = 3.83
+four loop unroll + multi acc + use vec_start = 1.12
+
