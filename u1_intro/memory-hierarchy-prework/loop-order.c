@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <time.h>
+
   /*
 
 Two different ways to loop over an array of arrays.
@@ -28,7 +31,20 @@ void option_two() {
 }
 
 int main() {
-  // option_one();
+  clock_t start, stop;
+  double slow, fast;
+
+  start = clock();
+  option_one();
+  stop = clock();
+  fast = (stop - start) / (double)CLOCKS_PER_SEC;
+
+  start = clock();
   option_two();
+  stop = clock();
+  slow = (stop - start) / (double)CLOCKS_PER_SEC;
+
+  printf("Fast took %f seconds\n", fast);
+  printf("Slow took %f seconds\n", slow);
   return 0;
 }
