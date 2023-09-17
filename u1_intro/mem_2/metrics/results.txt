@@ -1,0 +1,81 @@
+goos: linux
+goarch: amd64
+pkg: metrics
+cpu: AMD Ryzen 7 7700X 8-Core Processor             
+
+
+===========================
+base
+===========================
+
+BenchmarkMetrics/Average_age-16         	    1483	    808116 ns/op
+BenchmarkMetrics/Average_payment-16     	      68	  17108733 ns/op
+BenchmarkMetrics/Payment_stddev-16      	      33	  33820577 ns/op
+PASS
+ok  	metrics	6.099s
+
+
+===========================
+remove unused data from struct
+===========================
+
+BenchmarkMetrics/Average_age-16         	    1266	    831724 ns/op
+BenchmarkMetrics/Average_payment-16     	      78	  14983322 ns/op
+BenchmarkMetrics/Payment_stddev-16      	      39	  29734904 ns/op
+PASS
+ok  	metrics	5.894s
+
+
+===========================
+use []User instead of UserMap
+===========================
+
+BenchmarkMetrics/Average_age-16         	    2827	    367444 ns/op
+BenchmarkMetrics/Average_payment-16     	     148	   7983425 ns/op
+BenchmarkMetrics/Payment_stddev-16      	      73	  15367881 ns/op
+PASS
+ok  	metrics	4.629s
+
+
+
+===========================
+Average Age: remove arithmetic from loop
+===========================
+
+BenchmarkMetrics/Average_age-16         	   20811	     58254 ns/op
+BenchmarkMetrics/Average_payment-16     	     147	   8110644 ns/op
+BenchmarkMetrics/Payment_stddev-16      	      76	  15518348 ns/op
+PASS
+ok  	metrics	6.306s
+
+
+
+===========================
+Average Age: Loop unrolling x 4
+===========================
+
+BenchmarkMetrics/Average_age-16         	   48109	     23532 ns/op
+BenchmarkMetrics/Average_payment-16     	     147	   7973110 ns/op
+BenchmarkMetrics/Payment_stddev-16      	      76	  15445729 ns/op
+PASS
+ok  	metrics	5.880s
+
+
+===========================
+Average Payment: remove math from loops
+===========================
+
+BenchmarkMetrics/Average_age-16         	   49170	     23407 ns/op
+BenchmarkMetrics/Average_payment-16     	     230	   5148440 ns/op
+BenchmarkMetrics/Payment_stddev-16      	      94	  12561304 ns/op
+PASS
+ok  	metrics	5.791s
+
+===========================
+Average Payment: refactor data import, remove currecny math, reduce UserData to struct of two arrays
+===========================
+BenchmarkMetrics/Average_age-16         	   73873	     14487 ns/op
+BenchmarkMetrics/Average_payment-16     	    5394	    230903 ns/op
+BenchmarkMetrics/Payment_stddev-16      	    2113	    580420 ns/op
+PASS
+ok  	metrics	4.591s
