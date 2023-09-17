@@ -31,9 +31,9 @@ type PcapPacket struct {
 }
 
 type EthernetFrame struct {
-	MacDest   [6]byte
-	MacSource [6]byte
-	EthType   uint8
+	MacDest   []byte
+	MacSource []byte
+	EthType   uint16
 	Payload   []byte
 }
 
@@ -63,6 +63,8 @@ func main() {
 	fmt.Println(len(pcap_packets))
 
 	// Split into Ethernet Frames
+	eth_frames := parseEthernetFrames(pcap_packets)
+	fmt.Println(len(eth_frames))
 
 	// Parse IP Datagrams
 
@@ -104,4 +106,19 @@ func splitPcapPackets(packets []byte, file_size int) []PcapPacket {
 	}
 
 	return all_packets
+}
+
+func parseEthernetFrames(packets []PcapPacket) []EthernetFrame {
+	all_frames := make([]EthernetFrame, 0)
+	for _, packet := range packets {
+		payload := packet.Payload
+		eth_frame := EthernetFrame{
+			MacDest:   payload[:6],
+			MacSource: payload[6:12],
+			EthType:   binary.LittleEndian.Uint16(payload[12:16]),
+			Payload:   payload[14:],
+		}
+		all_frames = append(all_frames, eth_frame)
+	}
+	return all_frames
 }
