@@ -26,6 +26,12 @@ void matrix_multiply(double **C, double **A, double **B, int a_rows, int a_cols,
 
 void fast_matrix_multiply(double **C, double **A, double **B, int a_rows,
                           int a_cols, int b_cols) {
-  // TODO: write a faster implementation here!
-  return matrix_multiply(C, A, B, a_rows, a_cols, b_cols);
+  for (int i = 0; i < a_rows; i++) {
+    for (int j = 0; j < b_cols; j++) {
+      C[i][j] = 0;
+      for (int k = 0; k < a_cols; k++)
+        C[i][j] += A[i][k] * B[k][j];
+        C[i][j] += A[i][k] * B[k][j];
+    }
+  }
 }
