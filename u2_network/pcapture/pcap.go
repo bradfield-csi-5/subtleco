@@ -4,11 +4,6 @@ import (
 	"os"
 )
 
-const (
-	PCAP_FILE_HEADER   = 24
-	PCAP_PACKET_HEADER = 16
-)
-
 func check(e error) {
 	if e != nil {
 		panic(e)
@@ -29,11 +24,11 @@ func main() {
 	// Get file header
 	pcacFile := parsePcapFile(buf)
 
-	// Split into Pcap Packets
-	filePayloadSize := fileSize - PCAP_FILE_HEADER
+	// Parse Pcap Packets
+	filePayloadSize := fileSize - 24
 	pcapPackets := splitPcapPackets(pcacFile.Payload, filePayloadSize)
 
-	// Split into Ethernet Frames
+	// Parse Ethernet Frames
 	ethFrames := parseEthernetFrames(pcapPackets)
 
 	// Parse IP Datagrams
@@ -45,8 +40,10 @@ func main() {
 
 	// Stitch back together
 	httpData := repairHTTPData(uniqueSegments)
+
+	// Extract body
 	_, body := extractHTTPHeader(httpData)
 
-	// Parse HTTP elements
+	// Write to file
 	os.WriteFile("dude.jpeg", []byte(body), 0666)
 }

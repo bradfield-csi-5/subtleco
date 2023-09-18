@@ -33,7 +33,7 @@ func splitPcapPackets(packets []byte, file_size int) []PcapPacket {
 		}
 
 		all_packets = append(all_packets, pcap_packet)
-		packet_start += PCAP_PACKET_HEADER + int(packet_length)
+		packet_start += 16 + int(packet_length)
 	}
 
 	return all_packets
