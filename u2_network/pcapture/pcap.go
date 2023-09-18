@@ -51,6 +51,7 @@ type IPDatagram struct {
 	HeaderChecksum uint16
 	SourceIP       uint32
 	DestinationIP  uint32
+	Options        []byte
 	Payload        []byte
 }
 
@@ -152,18 +153,21 @@ func parseIPDatagrams(eth_frames []EthernetFrame) []IPDatagram {
 			TotalLength:    binary.BigEndian.Uint16(payload[2:4]),
 			Identification: binary.BigEndian.Uint16(payload[4:6]),
 			Flags:          payload[6] >> 5,
-			FragmentOffset: binary.BigEndian.Uint16(payload[6:8]),
+			FragmentOffset: binary.BigEndian.Uint16(payload[6:8]) & 0x1fff,
 			TTL:            payload[8],
 			Protocol:       payload[9],
 			HeaderChecksum: binary.BigEndian.Uint16(payload[10:12]),
 			SourceIP:       binary.BigEndian.Uint32(payload[12:16]),
 			DestinationIP:  binary.BigEndian.Uint32(payload[16:20]),
 		}
-		if datagram.IHL > 5 {
-			datagram.Payload = payload[20:]
+
+		options_len := (datagram.IHL - 5) * 4
+
+		if options_len > 0 {
+			datagram.Options = payload[20 : 20+options_len]
 		}
+		datagram.Payload = payload[20+options_len:]
 		all_datagrams = append(all_datagrams, datagram)
-		fmt.Println(datagram.DestinationIP)
 	}
 	return all_datagrams
 }
