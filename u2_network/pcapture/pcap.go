@@ -16,13 +16,8 @@ func main() {
 	check(err)
 	fileSize := len(file)
 
-	// copy the contents into a properly sized buffer
-	buf := make([]byte, fileSize)
-	copy(buf, file)
-	check(err)
-
 	// Get file header
-	pcacFile := parsePcapFile(buf)
+	pcacFile := parsePcapFile(file)
 
 	// Parse Pcap Packets
 	filePayloadSize := fileSize - 24
