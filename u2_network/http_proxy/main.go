@@ -133,8 +133,8 @@ func resolveFromServer(clientFd int, clientBuf []byte, cache map[string][]byte) 
 			break
 		}
 
-		unix.Close(serverFd)
 	}
+	unix.Close(serverFd)
 }
 
 func resolveFromCache(clientFd int, clientBuf []byte, cache map[string][]byte) bool {
