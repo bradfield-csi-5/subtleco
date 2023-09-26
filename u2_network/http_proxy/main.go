@@ -28,6 +28,7 @@ func main() {
 	for {
 		// Accept a connection
 		clientFd := acceptConnection(fd)
+		defer unix.Close(clientFd)
 
 		// Receive a packet
 		clientBuf := make([]byte, 512)
@@ -39,9 +40,6 @@ func main() {
 		if !cacheHit {
 			resolveFromServer(clientFd, clientBuf, cache)
 		}
-
-		// Close the connection
-		unix.Close(clientFd)
 	}
 }
 
