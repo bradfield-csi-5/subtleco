@@ -1,11 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"log"
-	"os"
-)
-
 type TokenType string
 
 const (
@@ -118,20 +112,15 @@ func isAlphaNumeric(c string) bool {
 	return isAlpha(c) || isDigit(c)
 }
 
-func main() {
-	if len(os.Args) > 2 {
-		log.Fatal("Why have you done this stop putting so many things in")
-	}
+func Scan(input string) []Token {
 	scanner := Scanner{
-		Input:   os.Args[1],
+		Input:   input,
 		Start:   0,
 		Current: 0,
 		Line:    1,
-		Length:  len(os.Args[1]),
+		Length:  len(input),
 	}
 
 	scanner.scan()
-	for _, token := range scanner.Tokens {
-		fmt.Printf("%+v\n", token)
-	}
+	return scanner.Tokens
 }
