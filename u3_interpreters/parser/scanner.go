@@ -7,12 +7,14 @@ const (
 	OR                   = "OR"
 	NOT                  = "NOT"
 	IDENTIFIER           = "IDENTIFIER"
+	EOF                  = "EOF"
 )
 
 var keywords = map[string]TokenType{
 	"AND": AND,
 	"OR":  OR,
 	"NOT": NOT,
+	"EOF": EOF,
 }
 
 type Token struct {
@@ -122,5 +124,12 @@ func Scan(input string) []Token {
 	}
 
 	scanner.scan()
+	eof := Token{
+		Type:    EOF,
+		Line:    scanner.Line,
+		Lexeme:  "EOF",
+		Literal: "EOF",
+	}
+	scanner.Tokens = append(scanner.Tokens, eof)
 	return scanner.Tokens
 }
