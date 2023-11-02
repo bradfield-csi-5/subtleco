@@ -1,7 +1,6 @@
-diff --git a/Doc/data/python3.11.abi b/Doc/data/python3.11.abi
-index 14ffe9cab2..d85bb131bc 100644
-
-Doc/data/python3.11.abi
+===========================
+= Doc/data/python3.11.abi =
+===========================
 @@ -11755,6 +11755,7 @@
        <enumerator name='Pass_kind' value='25'/>
        <enumerator name='Break_kind' value='26'/>
@@ -10,10 +9,10 @@ Doc/data/python3.11.abi
      </enum-decl>
      <union-decl name='__anonymous_union__' size-in-bits='384' is-anonymous='yes' visibility='default' filepath='./Include/internal/pycore_ast.h' line='187' column='1' id='type-id-614'>
        <data-member access='private'>
-diff --git a/Grammar/python.gram b/Grammar/python.gram
-index bae8bc3224..1161bc61b3 100644
 
-Grammar/python.gram
+=======================
+= Grammar/python.gram =
+=======================
 @@ -133,6 +133,7 @@ compound_stmt[stmt_ty]:
      | &('for' | ASYNC) for_stmt
      | &'try' try_stmt
@@ -47,10 +46,10 @@ Grammar/python.gram
  invalid_for_stmt:
      | [ASYNC] 'for' star_targets 'in' star_expressions NEWLINE { RAISE_SYNTAX_ERROR("expected ':'") }
      | [ASYNC] a='for' star_targets 'in' star_expressions ':' NEWLINE !INDENT {
-diff --git a/Include/internal/pycore_ast.h b/Include/internal/pycore_ast.h
-index 36277efe9c..ce4bf48bf2 100644
 
-Include/internal/pycore_ast.h
+=================================
+= Include/internal/pycore_ast.h =
+=================================
 @@ -177,11 +177,12 @@ struct _mod {
  enum _stmt_kind {FunctionDef_kind=1, AsyncFunctionDef_kind=2, ClassDef_kind=3,
                    Return_kind=4, Delete_kind=5, Assign_kind=6,
@@ -95,7 +94,9 @@ Include/internal/pycore_ast.h
 diff --git a/Include/internal/pycore_ast_state.h b/Include/internal/pycore_ast_state.h
 index f15b4905ee..a577aad32d 100644
 
-Parser/Python.asdl
+======================
+= Parser/Python.asdl =
+======================
 @@ -32,6 +32,7 @@ module Python
            | For(expr target, expr iter, stmt* body, stmt* orelse, string? type_comment)
            | AsyncFor(expr target, expr iter, stmt* body, stmt* orelse, string? type_comment)
@@ -107,7 +108,9 @@ Parser/Python.asdl
 diff --git a/Parser/parser.c b/Parser/parser.c
 index b2c0cfe3c2..6b0c3cd0a9 100644
 
-Python/Python-ast.c
+=======================
+= Python/Python-ast.c =
+=======================
 @@ -156,6 +156,7 @@ void _PyAST_Fini(PyInterpreterState *interp)
      Py_CLEAR(state->USub_singleton);
      Py_CLEAR(state->USub_type);
@@ -330,7 +333,9 @@ Python/Python-ast.c
          return -1;
      }
 
-Python/ast.c
+================
+= Python/ast.c =
+================
 @@ -780,6 +780,11 @@ validate_stmt(struct validator *state, stmt_ty stmt)
              validate_body(state, stmt->v.While.body, "While") &&
              validate_stmts(state, stmt->v.While.orelse);
@@ -344,7 +349,9 @@ Python/ast.c
          ret = validate_expr(state, stmt->v.If.test, Load) &&
              validate_body(state, stmt->v.If.body, "If") &&
 
-Python/ast_opt.c
+====================
+= Python/ast_opt.c =
+====================
 @@ -935,6 +935,11 @@ astfold_stmt(stmt_ty node_, PyArena *ctx_, _PyASTOptimizeState *state)
          CALL_SEQ(astfold_stmt, stmt, node_->v.While.body);
          CALL_SEQ(astfold_stmt, stmt, node_->v.While.orelse);
@@ -358,7 +365,9 @@ Python/ast_opt.c
          CALL(astfold_expr, expr_ty, node_->v.If.test);
          CALL_SEQ(astfold_stmt, stmt, node_->v.If.body);
 
-Python/compile.c
+====================
+= Python/compile.c =
+====================
 @@ -273,7 +273,7 @@ compiler IR.
  
  enum fblocktype { WHILE_LOOP, FOR_LOOP, TRY_EXCEPT, FINALLY_TRY, FINALLY_END,
@@ -446,7 +455,9 @@ Python/compile.c
          return compiler_if(c, s);
      case Match_kind:
 
-Python/symtable.c
+=====================
+= Python/symtable.c =
+=====================
 @@ -1308,6 +1308,12 @@ symtable_visit_stmt(struct symtable *st, stmt_ty s)
          if (s->v.While.orelse)
              VISIT_SEQ(st, stmt, s->v.While.orelse);
