@@ -1,5 +1,6 @@
 #include "vendor/unity.h"
 
+#include <sys/time.h>
 #include "vec.h"
 
 extern data_t dotproduct(vec_ptr, vec_ptr);
@@ -49,15 +50,17 @@ void test_longer(void) {
 
   long expected = (2 * n * n * n + 3 * n * n + n) / 6;
 
-  clock_t start = clock();
+  struct timeval start, stop;
+  gettimeofday(&start, NULL);
   long actual = dotproduct(u, v);
-  clock_t end = clock();
+  gettimeofday(&stop, NULL);
+
 
   TEST_ASSERT_EQUAL(expected, actual);
-  double time_elapsed = (end - start) / (double)CLOCKS_PER_SEC;
+  double elapsed = stop.tv_sec - start.tv_sec + (stop.tv_usec - start.tv_usec) / 1000000.0;
   printf(
       "%0.2fs to take product of length %ld vectors (%0.2f ns per element)\n",
-      time_elapsed, n, time_elapsed * 1e9 / n); 
+      elapsed, n, elapsed * 1e9 / n);
 
   free_vec(u);
   free_vec(v);
