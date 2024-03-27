@@ -35,9 +35,9 @@ func (d *Database) Has(key []byte) (bool, error) {
 }
 
 func (d *Database) Put(key, value []byte) error {
-	for _, entry := range d.entries {
+	for i, entry := range d.entries {
 		if BEQ(key, entry.key) {
-			entry.value = value
+			d.entries[i].value = value
 			return nil
 		}
 	}
