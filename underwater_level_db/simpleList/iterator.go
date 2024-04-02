@@ -1,4 +1,4 @@
-package main
+package simpleList
 
 type RSIterator struct {
 	entries []Entry

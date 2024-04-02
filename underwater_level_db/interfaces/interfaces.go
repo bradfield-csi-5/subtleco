@@ -1,4 +1,4 @@
-package main
+package interfaces
 
 type DB interface {
 	Get(key []byte) (inx int, value []byte, err error)
