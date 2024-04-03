@@ -1,7 +1,8 @@
 package interfaces
 
 type DB interface {
-	Get(key []byte) (inx int, value []byte, err error)
+	// returns value for given key, error if not found
+	Get(key []byte) (value []byte, err error)
 
 	Has(key []byte) (ret bool, err error)
 

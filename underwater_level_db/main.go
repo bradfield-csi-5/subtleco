@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"underwater/skipList"
+	"underwater/utils"
 )
 
 func main() {
@@ -11,22 +12,62 @@ func main() {
 		panic(err.Error())
 	}
 
-	db.Put([]byte("pizza"), []byte("yummo"))
+	db.Put([]byte("pizzas"), []byte("yummo"))
 	db.Put([]byte("goblin"), []byte("ickko"))
-	db.Put([]byte("water"), []byte("fine"))
-	db.Put([]byte("goblin"), []byte("ickkYYYYYYYYY"))
-	db.Put([]byte("goldfish"), []byte("xyz"))
+	db.Put([]byte("watery"), []byte("fine"))
+	db.Put([]byte("gldfsh"), []byte("xyz"))
 	db.Put([]byte("darren"), []byte("xyz"))
-	db.Put([]byte("apple"), []byte("xyz"))
+	db.Put([]byte("appler"), []byte("xyz"))
 
-	for level := db.Level; level > 0; level-- {
-
-		entry := db.Header.Forward[level-1]
-		fmt.Printf("%d. Header", level)
-		for entry != nil {
-			fmt.Printf(" --> %s", string(entry.Key))
-			entry = entry.Forward[level-1]
-		}
-		println()
+	// test edit
+	preEdit, _ := db.Get([]byte("goblin"))
+	db.Put([]byte("goblin"), []byte("ickkYYYYYYYYY"))
+	postEdit, _ := db.Get([]byte("goblin"))
+	if !utils.BEQ(preEdit, postEdit) {
+		println("editing a key works")
 	}
+
+	// get success
+	get, err := db.Get([]byte("watery"))
+	if err == nil {
+		println("Value for watery:", string(get))
+	}
+
+	// get fail
+	_, err = db.Get([]byte("nothing"))
+	if err != nil {
+		println(err.Error())
+	}
+
+	// has
+	has, _ := db.Has([]byte("watery"))
+	if has {
+		println("DB does have entry with key 'watery'")
+	}
+
+	// has not
+	hasNot, _ := db.Has([]byte("buffalo"))
+	if !hasNot {
+		println("DB does NOT have entry with key 'buffalo'")
+	}
+
+	// Delete test
+	key := "goblin"
+	db.Delete([]byte(key))
+	has, _ = db.Has([]byte(key))
+	if !has {
+		println("Successfully deleted", key)
+	}
+
+	// RangeScan test
+	start := []byte("appler")
+	end := []byte("pizzas")
+	iter, err := db.RangeScan(start, end)
+	fmt.Printf("\nRangeScan of %s to %s\n", string(start), string(end))
+	println("-------------------------")
+	fmt.Printf("%s ", string(iter.Key()))
+	for iter.Next() {
+		fmt.Printf("--> %s ", string(iter.Key()))
+	}
+	println()
 }
