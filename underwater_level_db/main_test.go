@@ -99,7 +99,7 @@ func BenchmarkSimpleGet3(b *testing.B) {
 
 func BenchmarkSkipRangeScan(b *testing.B) {
 	startKey := []byte("key0900")
-	endKey := []byte("key0950") // Adjust the range according to your test needs
+	endKey := []byte("key0950")
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -109,7 +109,12 @@ func BenchmarkSkipRangeScan(b *testing.B) {
 		}
 
 		// Assuming iterator needs to be iterated to perform the scan.
+		iters := 0
 		for iterator.Next() {
+			iters++
+		}
+		if i == b.N-1 {
+			println("SkipList Iterations:", iters)
 		}
 
 		if err := iterator.Error(); err != nil {
@@ -120,7 +125,7 @@ func BenchmarkSkipRangeScan(b *testing.B) {
 
 func BenchmarkSimpleRangeScan(b *testing.B) {
 	startKey := []byte("key0900")
-	endKey := []byte("key0950") // Adjust the range according to your test needs
+	endKey := []byte("key0950")
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -130,7 +135,12 @@ func BenchmarkSimpleRangeScan(b *testing.B) {
 		}
 
 		// Iterate over the results.
+		iters := 0
 		for iterator.Next() {
+			iters++
+		}
+		if i == b.N-1 {
+			println("SimpleList Iterations:", iters)
 		}
 
 		if err := iterator.Error(); err != nil {
