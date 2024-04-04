@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	size = 1000
+	size = 10000
 	low  = "key1"
 	med  = "key5000"
 	high = "key9999"
@@ -90,22 +90,6 @@ func BenchmarkSimpleGet3(b *testing.B) {
 	}
 }
 
-func BenchmarkSkipPut(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		key := []byte("key" + strconv.Itoa(i))
-		value := []byte("value" + strconv.Itoa(i))
-		skipDB.Put(key, value)
-	}
-}
-
-func BenchmarkSimplePut(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		key := []byte("key" + strconv.Itoa(i))
-		value := []byte("value" + strconv.Itoa(i))
-		simpleDB.Put(key, value)
-	}
-}
-
 func BenchmarkSkipRangeScan(b *testing.B) {
 	startKey := []byte("key100")
 	endKey := []byte("key1100") // Adjust the range according to your test needs
@@ -145,5 +129,21 @@ func BenchmarkSimpleRangeScan(b *testing.B) {
 		if err := iterator.Error(); err != nil {
 			b.Fatalf("Iteration failed: %v", err)
 		}
+	}
+}
+
+func BenchmarkSkipPut(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		key := []byte("key" + strconv.Itoa(i))
+		value := []byte("value" + strconv.Itoa(i))
+		skipDB.Put(key, value)
+	}
+}
+
+func BenchmarkSimplePut(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		key := []byte("key" + strconv.Itoa(i))
+		value := []byte("value" + strconv.Itoa(i))
+		simpleDB.Put(key, value)
 	}
 }
