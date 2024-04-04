@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 	"underwater/simpleList"
@@ -9,7 +10,7 @@ import (
 
 const (
 	size = 10000
-	low  = "key1"
+	low  = "key0001"
 	med  = "key5000"
 	high = "key9999"
 )
@@ -23,9 +24,15 @@ func init() {
 	println("Initializing test DBs")
 	skipDB, _ = skipList.CreateDatabase()
 	simpleDB = simpleList.Database{}
+
+	// Determine the width for zero padding based on the size variable.
+	// This will ensure all keys have the same width.
+	width := len(strconv.Itoa(size - 1))
+
 	for i := 0; i < size; i++ {
-		key := []byte("key" + strconv.Itoa(i))
-		value := []byte("value" + strconv.Itoa(i))
+		// Use fmt.Sprintf to format the key with leading zeros based on the width calculated.
+		key := []byte(fmt.Sprintf("key%0*d", width, i))
+		value := []byte(fmt.Sprintf("value%0*d", width, i))
 		simpleDB.Put(key, value)
 		skipDB.Put(key, value)
 	}
@@ -91,8 +98,8 @@ func BenchmarkSimpleGet3(b *testing.B) {
 }
 
 func BenchmarkSkipRangeScan(b *testing.B) {
-	startKey := []byte("key100")
-	endKey := []byte("key1100") // Adjust the range according to your test needs
+	startKey := []byte("key0900")
+	endKey := []byte("key0950") // Adjust the range according to your test needs
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -112,8 +119,8 @@ func BenchmarkSkipRangeScan(b *testing.B) {
 }
 
 func BenchmarkSimpleRangeScan(b *testing.B) {
-	startKey := []byte("key100")
-	endKey := []byte("key1100") // Keep the range consistent for fair comparison
+	startKey := []byte("key0900")
+	endKey := []byte("key0950") // Adjust the range according to your test needs
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
