@@ -94,7 +94,7 @@ func (d *Database) Sort() {
 }
 
 func (d *Database) LoadCSV() error {
-	file, err := os.Open("movies.csv")
+	file, err := os.Open("../movies.csv")
 	if err != nil {
 		return errors.New("Failed to open file")
 	}

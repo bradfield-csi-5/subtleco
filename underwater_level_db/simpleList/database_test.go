@@ -1,14 +1,13 @@
-package main
+package simpleList
 
 import (
 	"bytes"
 	"testing"
-	"underwater/simpleList"
 )
 
 // TestPutAndGet tests both the Put and Get methods of the Database.
 func TestPutAndGet(t *testing.T) {
-	db := simpleList.Database{Entries: make([]simpleList.Entry, 0)}
+	db := Database{Entries: make([]Entry, 0)}
 	key, value := []byte("Cat_01"), []byte("Parmesan")
 
 	db.Put(key, value)
@@ -23,7 +22,7 @@ func TestPutAndGet(t *testing.T) {
 
 // TestGetFail tests the Get method for a non-existent key.
 func TestGetFail(t *testing.T) {
-	db := simpleList.Database{Entries: make([]simpleList.Entry, 0)}
+	db := Database{Entries: make([]Entry, 0)}
 	_, err := db.Get([]byte("Nothing"))
 	if err == nil {
 		t.Error("Expected error for non-existent key, got nil")
@@ -32,7 +31,7 @@ func TestGetFail(t *testing.T) {
 
 // TestDelete tests the Delete method of the Database.
 func TestDelete(t *testing.T) {
-	db := simpleList.Database{Entries: make([]simpleList.Entry, 0)}
+	db := Database{Entries: make([]Entry, 0)}
 	key := []byte("Dog_01")
 	db.Put(key, []byte("Frodo Waggins"))
 
@@ -45,7 +44,7 @@ func TestDelete(t *testing.T) {
 
 // TestHas tests the Has method for both existing and non-existing keys.
 func TestHas(t *testing.T) {
-	db := simpleList.Database{Entries: make([]simpleList.Entry, 0)}
+	db := Database{Entries: make([]Entry, 0)}
 	existingKey := []byte("Dog_02")
 	nonExistingKey := []byte("Nothing")
 	db.Put(existingKey, []byte("LC"))
@@ -63,7 +62,7 @@ func TestHas(t *testing.T) {
 
 // Test CSV seeding method
 func TestCSVSeed(t *testing.T) {
-	db := simpleList.Database{Entries: make([]simpleList.Entry, 0)}
+	db := Database{Entries: make([]Entry, 0)}
 	db.LoadCSV()
 
 	key := "Grumpier Old Men (1995)"
@@ -75,7 +74,7 @@ func TestCSVSeed(t *testing.T) {
 
 // TestRangeScan tests the RangeScan method for a given range.
 func TestRangeScan(t *testing.T) {
-	db := simpleList.Database{Entries: make([]simpleList.Entry, 0)}
+	db := Database{Entries: make([]Entry, 0)}
 	db.Put([]byte("Cat_01"), []byte("Parmesan"))
 	db.Put([]byte("Cat_02"), []byte("Tabasco"))
 	db.Put([]byte("Cat_03"), []byte("Franklin"))

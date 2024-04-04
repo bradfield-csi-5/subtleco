@@ -63,7 +63,7 @@ func (d *Database) Put(searchKey, newValue []byte) error {
 	// generate level, update DB level
 	level := getLevel()
 	if d.Level < level {
-		for i := d.Level; i <= level; i++ {
+		for i := d.Level; i < level; i++ {
 			update[i] = d.Header
 		}
 		d.Level = level
@@ -116,11 +116,7 @@ func (d *Database) Delete(searchKey []byte) error {
 }
 
 func (d *Database) RangeScan(start, end []byte) (RSIterator, error) {
-	head, _, _, err := d.search(start)
-	if err != nil {
-		return RSIterator{}, err
-	}
-	tail, _, _, err := d.search(end)
+	head, _, match, err := d.search(start)
 	if err != nil {
 		return RSIterator{}, err
 	}
@@ -131,9 +127,9 @@ func (d *Database) RangeScan(start, end []byte) (RSIterator, error) {
 	for {
 		current = current.Forward[0]
 		iter.entries = append(iter.entries, *current)
-		if current.Forward[0] == tail {
-			if utils.BEQ(end, tail.Key) {
-				iter.entries = append(iter.entries, *tail)
+		if !utils.BLT(current.Forward[0].Key, end) {
+			if match {
+				iter.entries = append(iter.entries, *current.Forward[0])
 			}
 			return iter, err
 		}
@@ -155,7 +151,12 @@ func (d *Database) search(searchKey []byte) (node *Node, forward Forward, match 
 	}
 
 	current = current.Forward[0]
-	directMatch := utils.BEQ(current.Key, searchKey)
+	var directMatch bool
+	if current != nil {
+		directMatch = utils.BEQ(current.Key, searchKey)
+	} else {
+		directMatch = false
+	}
 
 	return current, update, directMatch, nil
 }
