@@ -4,25 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"underwater/WAL"
+	"underwater/types"
 	"underwater/utils"
 )
 
-const (
-	MAX_LVL  = 10
-	LAST_KEY = "zzzzzz"
-)
-
-type Forward [MAX_LVL]*Node
-
 type Database struct {
-	Header *Node
+	Header *types.Node
 	Level  int
-}
-
-type Node struct {
-	Key     []byte
-	Value   []byte
-	Forward Forward
 }
 
 func (d *Database) Get(searchKey []byte) ([]byte, error) {
@@ -53,6 +42,13 @@ func (d *Database) Put(searchKey, newValue []byte) error {
 	if err != nil {
 		panic(err.Error())
 	}
+
+	wal := WAL.WAL{}
+	entry, err := wal.CreateEntry(searchKey, newValue, utils.PUT)
+	if err != nil {
+		panic(err.Error())
+	}
+	wal.Write(entry)
 
 	// check for and update an old key
 	if match {
@@ -88,6 +84,15 @@ func (d *Database) Delete(searchKey []byte) error {
 	current, update, match, err := d.search(searchKey)
 	if err != nil {
 		return err
+	}
+	wal := WAL.WAL{}
+	entry, err := wal.CreateEntry(searchKey, nil, utils.DELETE)
+	if err != nil {
+		panic(err.Error())
+	}
+	err = wal.Write(entry)
+	if err != nil {
+		panic(err.Error())
 	}
 
 	// check for key
@@ -136,8 +141,8 @@ func (d *Database) RangeScan(start, end []byte) (RSIterator, error) {
 	}
 }
 
-func (d *Database) search(searchKey []byte) (node *Node, forward Forward, match bool, err error) {
-	update := Forward{}
+func (d *Database) search(searchKey []byte) (node *types.Node, forward types.Forward, match bool, err error) {
+	update := types.Forward{}
 	current := d.Header
 
 	// start at the highest current level to save time
@@ -161,11 +166,11 @@ func (d *Database) search(searchKey []byte) (node *Node, forward Forward, match 
 	return current, update, directMatch, nil
 }
 
-func makeNode(searchKey, newValue []byte) *Node {
-	node := &Node{
+func makeNode(searchKey, newValue []byte) *types.Node {
+	node := &types.Node{
 		Key:     searchKey,
 		Value:   newValue,
-		Forward: Forward{},
+		Forward: types.Forward{},
 	}
 	return node
 }
@@ -173,7 +178,7 @@ func makeNode(searchKey, newValue []byte) *Node {
 func getLevel() int {
 	i := 1
 	for {
-		if i == MAX_LVL {
+		if i == utils.MAX_LVL {
 			return i
 		}
 		x := rand.Float32()
@@ -186,25 +191,43 @@ func getLevel() int {
 }
 
 func CreateDatabase() (Database, error) {
+	entries, err := WAL.ReadWAL()
+	if err != nil {
+		panic(err.Error())
+	}
 	// Set up nil tail
-	tail := &Node{
-		Key:     []byte(LAST_KEY),
+	tail := &types.Node{
+		Key:     []byte(utils.LAST_KEY),
 		Value:   nil,
-		Forward: Forward{},
+		Forward: types.Forward{},
 	}
 
 	// instantiate DB
 	db := Database{
-		Header: &Node{
+		Header: &types.Node{
 			Key:     []byte("HEADER"),
-			Forward: Forward{},
+			Forward: types.Forward{},
 		},
 		Level: 1,
 	}
 
 	// Point header to tail
-	for i := 0; i < MAX_LVL; i++ {
+	for i := 0; i < utils.MAX_LVL; i++ {
 		db.Header.Forward[i] = tail
+	}
+
+	// Restore WAL
+	if len(entries) > 0 {
+		for _, entry := range entries {
+			if entry.Op() == utils.PUT {
+				// Put node
+				db.Put(entry.Key(), entry.Value())
+			}
+			if entry.Op() == utils.DELETE {
+				// Delete node
+				db.Delete(entry.Key())
+			}
+		}
 	}
 
 	return db, nil

@@ -11,13 +11,20 @@ import (
 const (
 	size = 10000
 	low  = "key0001"
-	med  = "key5000"
+	mid  = "key5000"
 	high = "key9999"
 )
 
 var (
 	skipDB   skipList.Database
 	simpleDB simpleList.Database
+	start    = "key9900"
+	end      = "key9950"
+	lowKey   = []byte(low)
+	midKey   = []byte(mid)
+	highKey  = []byte(high)
+	startKey = []byte(start)
+	endKey   = []byte(end)
 )
 
 func init() {
@@ -26,7 +33,6 @@ func init() {
 	simpleDB = simpleList.Database{}
 
 	// Determine the width for zero padding based on the size variable.
-	// This will ensure all keys have the same width.
 	width := len(strconv.Itoa(size - 1))
 
 	for i := 0; i < size; i++ {
@@ -37,11 +43,14 @@ func init() {
 		skipDB.Put(key, value)
 	}
 	println("Initialization complete")
+	println("-----------------------")
+	println("Start:", start)
+	println("End:", end)
 }
 
 func BenchmarkSkipGet3(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		keys := []string{low, med, high}
+		keys := []string{low, mid, high}
 		for _, key := range keys {
 			testKey := []byte(key)
 			_, err := skipDB.Get(testKey)
@@ -54,7 +63,7 @@ func BenchmarkSkipGet3(b *testing.B) {
 
 func BenchmarkSimpleHas3(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		keys := []string{low, med, high}
+		keys := []string{low, mid, high}
 		for _, key := range keys {
 			testKey := []byte(key)
 			has, err := simpleDB.Has(testKey)
@@ -70,7 +79,7 @@ func BenchmarkSimpleHas3(b *testing.B) {
 
 func BenchmarkSkipHas3(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		keys := []string{low, med, high}
+		keys := []string{low, mid, high}
 		for _, key := range keys {
 			testKey := []byte(key)
 			has, err := skipDB.Has(testKey)
@@ -86,7 +95,7 @@ func BenchmarkSkipHas3(b *testing.B) {
 
 func BenchmarkSimpleGet3(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		keys := []string{low, med, high}
+		keys := []string{low, mid, high}
 		for _, key := range keys {
 			testKey := []byte(key)
 			_, err := simpleDB.Get(testKey)
@@ -98,23 +107,13 @@ func BenchmarkSimpleGet3(b *testing.B) {
 }
 
 func BenchmarkSkipRangeScan(b *testing.B) {
-	startKey := []byte("key0900")
-	endKey := []byte("key0950")
-
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		iterator, err := skipDB.RangeScan(startKey, endKey)
 		if err != nil {
 			b.Fatalf("RangeScan failed: %v", err)
 		}
 
-		// Assuming iterator needs to be iterated to perform the scan.
-		iters := 0
 		for iterator.Next() {
-			iters++
-		}
-		if i == b.N-1 {
-			println("SkipList Iterations:", iters)
 		}
 
 		if err := iterator.Error(); err != nil {
@@ -124,23 +123,13 @@ func BenchmarkSkipRangeScan(b *testing.B) {
 }
 
 func BenchmarkSimpleRangeScan(b *testing.B) {
-	startKey := []byte("key0900")
-	endKey := []byte("key0950")
-
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		iterator, err := simpleDB.RangeScan(startKey, endKey)
 		if err != nil {
 			b.Fatalf("RangeScan failed: %v", err)
 		}
 
-		// Iterate over the results.
-		iters := 0
 		for iterator.Next() {
-			iters++
-		}
-		if i == b.N-1 {
-			println("SimpleList Iterations:", iters)
 		}
 
 		if err := iterator.Error(); err != nil {

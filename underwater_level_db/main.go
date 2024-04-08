@@ -11,6 +11,14 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
+	db.Print()
+}
+
+func main2() {
+	db, err := skipList.CreateDatabase()
+	if err != nil {
+		panic(err.Error())
+	}
 
 	db.Put([]byte("pizzas"), []byte("yummo"))
 	db.Put([]byte("goblin"), []byte("ickko"))
@@ -70,4 +78,6 @@ func main() {
 		fmt.Printf("--> %s ", string(iter.Key()))
 	}
 	println()
+
+	db.Print()
 }

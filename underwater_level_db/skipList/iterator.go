@@ -1,7 +1,9 @@
 package skipList
 
+import "underwater/types"
+
 type RSIterator struct {
-	entries []Node
+	entries []types.Node
 	index   int
 }
 
