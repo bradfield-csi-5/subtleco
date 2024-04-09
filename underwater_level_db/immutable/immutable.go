@@ -39,8 +39,9 @@ func CreateImmuDB(filename string) (ImmuDB, error) {
 	immuDB.dir = directory
 
 	fmt.Printf("Filename: %s\n", filename)
+	println("-------Directory-------")
 	for i, entry := range immuDB.dir.sparseKeys {
-		fmt.Printf("%s is at %x\n", string(entry), immuDB.dir.offsets[i])
+		fmt.Printf("%s is at offset %x\n", string(entry), immuDB.dir.offsets[i])
 	}
 	return immuDB, err
 }
@@ -57,7 +58,6 @@ func extractDirectoryStream(filename string) ([]byte, error) {
 	dirOffsetBuf := make([]byte, 2)
 	f.Read(dirOffsetBuf)
 	dirOffset := int64(binary.BigEndian.Uint16(dirOffsetBuf))
-	println("dirOff", dirOffset)
 
 	dirLen := fileLen - dirOffset
 
