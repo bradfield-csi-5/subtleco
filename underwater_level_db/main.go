@@ -2,11 +2,35 @@ package main
 
 import (
 	"fmt"
+	"underwater/immutable"
 	"underwater/skipList"
 	"underwater/utils"
 )
 
+// testing reading from SSTable file
 func main() {
+	_, err := immutable.CreateImmuDB("20240409-154156.sst")
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+// testing writing SSTable
+func main6() {
+	db, err := skipList.CreateDatabase()
+	if err != nil {
+		panic(err.Error())
+	}
+	println("HLELO")
+	err = db.LoadCSV()
+	if err != nil {
+		panic(err.Error())
+	}
+	db.Print()
+}
+
+// testing WAL
+func main1() {
 	db, err := skipList.CreateDatabase()
 	if err != nil {
 		panic(err.Error())
@@ -14,6 +38,7 @@ func main() {
 	db.Print()
 }
 
+// general testing
 func main2() {
 	db, err := skipList.CreateDatabase()
 	if err != nil {
@@ -80,4 +105,5 @@ func main2() {
 	println()
 
 	db.Print()
+	fmt.Printf("Size of DB: %d\n", db.Size)
 }

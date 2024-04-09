@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"underwater/utils"
 )
@@ -123,7 +124,10 @@ func (w *WAL) byteStream(entry Entry) ([]byte, error) {
 func ReadWAL() ([]Entry, error) {
 	f, err := os.Open(utils.LOG)
 	if err != nil {
-		panic(err.Error())
+		if os.IsNotExist(err) {
+			log.Println("No WAL found\n", err)
+			return nil, nil
+		}
 	}
 
 	fi, err := f.Stat()

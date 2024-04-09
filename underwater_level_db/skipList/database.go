@@ -1,10 +1,14 @@
 package skipList
 
 import (
+	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
+	"os"
 	"underwater/WAL"
+	"underwater/ssTable"
 	"underwater/types"
 	"underwater/utils"
 )
@@ -12,6 +16,8 @@ import (
 type Database struct {
 	Header *types.Node
 	Level  int
+	Size   int
+	Tail   *types.Node
 }
 
 func (d *Database) Get(searchKey []byte) ([]byte, error) {
@@ -38,6 +44,9 @@ func (d *Database) Has(searchKey []byte) (bool, error) {
 }
 
 func (d *Database) Put(searchKey, newValue []byte) error {
+	if d.Size >= utils.MEMTABLE_CAP {
+		d.flushssTable()
+	}
 	current, update, match, err := d.search(searchKey)
 	if err != nil {
 		panic(err.Error())
@@ -52,6 +61,8 @@ func (d *Database) Put(searchKey, newValue []byte) error {
 
 	// check for and update an old key
 	if match {
+		d.Size -= len(current.Value)
+		d.Size += len(newValue)
 		current.Value = newValue
 		return nil
 	}
@@ -77,6 +88,9 @@ func (d *Database) Put(searchKey, newValue []byte) error {
 		update[i].Forward[i] = node
 
 	}
+
+	// Update table size for autoflushing purposes
+	d.Size += len(searchKey) + len(newValue) + 4
 	return nil
 }
 
@@ -141,6 +155,36 @@ func (d *Database) RangeScan(start, end []byte) (RSIterator, error) {
 	}
 }
 
+func (d *Database) LoadCSV() error {
+	println("LOADING CSV")
+	file, err := os.Open("movies.csv")
+	if err != nil {
+		return errors.New("Failed to open file")
+	}
+
+	defer file.Close()
+
+	// skip the header row
+	csvReader := csv.NewReader(file)
+	_, err = csvReader.Read()
+	if err != nil {
+		return errors.New("Failed to parse CSV")
+	}
+
+	for {
+		item, err := csvReader.Read()
+		if err != nil && err == io.EOF {
+			break
+		}
+		if err != nil {
+			panic(err.Error())
+		}
+
+		d.Put([]byte(item[1]), []byte(item[2]))
+	}
+	return nil
+}
+
 func (d *Database) search(searchKey []byte) (node *types.Node, forward types.Forward, match bool, err error) {
 	update := types.Forward{}
 	current := d.Header
@@ -191,10 +235,13 @@ func getLevel() int {
 }
 
 func CreateDatabase() (Database, error) {
-	entries, err := WAL.ReadWAL()
+	var entries []WAL.Entry
+	walEntries, err := WAL.ReadWAL()
 	if err != nil {
 		panic(err.Error())
 	}
+	entries = append(entries, walEntries...)
+
 	// Set up nil tail
 	tail := &types.Node{
 		Key:     []byte(utils.LAST_KEY),
@@ -209,12 +256,14 @@ func CreateDatabase() (Database, error) {
 			Forward: types.Forward{},
 		},
 		Level: 1,
+		Size:  0,
 	}
 
 	// Point header to tail
 	for i := 0; i < utils.MAX_LVL; i++ {
 		db.Header.Forward[i] = tail
 	}
+	db.Tail = tail
 
 	// Restore WAL
 	if len(entries) > 0 {
@@ -244,4 +293,35 @@ func (d *Database) Print() {
 		}
 		println()
 	}
+}
+
+// return an ordered list of all entries
+func (d *Database) ordered() []*types.Node {
+	var entries []*types.Node
+	first := d.Header.Forward[0]
+	entries = append(entries, first)
+	for current := first.Forward[0]; current != nil; current = current.Forward[0] {
+		entries = append(entries, current)
+	}
+	return entries
+}
+
+func (d *Database) flushssTable() error {
+	entries := d.ordered()
+	err := ssTable.Flush(entries)
+	if err != nil {
+		return err
+	}
+
+	// reset memtable
+	d.Size = 0
+	d.Level = 1
+	for i := 0; i < utils.MAX_LVL; i++ {
+		d.Header.Forward[i] = d.Tail
+	}
+
+	// remove WAL
+	os.Remove("WAL.log")
+	println("ssTable file written!")
+	return nil
 }

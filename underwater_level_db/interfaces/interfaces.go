@@ -26,3 +26,12 @@ type Iterator interface {
 	// Returns value of current pair, or nil if done
 	Value() []byte
 }
+
+type ImmutableDB interface {
+	// returns value for given key, error if not found
+	Get(key []byte) (value []byte, err error)
+
+	Has(key []byte) (ret bool, err error)
+
+	RangeScan(start, limit []byte) (Iterator, error)
+}
